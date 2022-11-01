@@ -1,12 +1,12 @@
-;;; org-rainbow-tags.el --- Colorize org tags automatically.
+;;; org-rainbow-tags.el --- Colorize org tags automatically -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022 Furkan Karataş
 
 ;; Author: Furkan Karataş <furkan.karatas02@gmail.com>
 ;; URL: https://github.com/KaratasFurkan/org-rainbow-tags
 ;; Version: 0.1-pre
-;; Package-Requires: ((emacs "27.2")) NOTE: Older versions are probably OK too
-;; Keywords: org, org-mode, tags, rainbow
+;; Package-Requires: ((emacs "28.1"))
+;; Keywords: faces, outlines
 
 ;; This file is not part of GNU Emacs.
 

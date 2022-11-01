@@ -220,7 +220,7 @@ The arg COLOR seems like unused but it is actually used in
   "Add the auto-generated tag faces."
   (org-rainbow-tags--delete-overlays)
   (save-excursion
-    (beginning-of-buffer)
+    (goto-char (point-min))
     (while (re-search-forward org-rainbow-tags--org-tag-regexp nil t)
       (let* ((overlay (make-overlay (match-beginning 1) (match-end 1))))
         (overlay-put overlay 'face (org-rainbow-tags--get-face 1))

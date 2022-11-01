@@ -113,27 +113,26 @@
   :prefix "org-rainbow-tags-")
 
 (defcustom org-rainbow-tags-face-attributes '(:foreground color :weight 'bold)
-  "Face attributes for auto-generated org tag faces. `color' is
-the placeholder for the auto-generated color and it can be used
-as foreground, background etc. All tags will look same if you
-omit `color' placeholder. Should be a list of ATTRIBUTE VALUE
-pairs like in `set-face-attribute' function."
+  "Face attributes for auto-generated org tag faces.
+`color' is the placeholder for the auto-generated color and it can be used as
+foreground, background etc. All tags will look same if you omit `color'
+placeholder. Should be a list of ATTRIBUTE VALUE pairs like in
+`set-face-attribute' function."
   :group 'org-rainbow-tags
   :type 'list)
 
 (defcustom org-rainbow-tags-hash-start-index 0
-  "Start from this index when extracting substring from the hash
-of the tag. This can be useful when you don't like the
-auto-generated colors and want to change them. Should be between
-0-20."
+  "Start from this index when extracting substring from the hash of the tag.
+This can be useful when you don't like the auto-generated colors and want to
+change them. Should be between 0-20."
   :group 'org-rainbow-tags
   :type 'integer)
 
 (defcustom org-rainbow-tags-adjust-color-percent 20
-  "Lighten or darken auto-generated colors by this percent if the
-color is similar to current background color. This can be useful
-when you don't like the auto-generated colors and want to change
-them. Should be between 0-100."
+  "Lighten or darken auto-generated colors by this percent if necessary.
+This value is used when the auto-generated color is similar to the current
+background color. This can be useful when you don't like the auto-generated
+colors and want to change them. Should be between 0-100."
   :group 'org-rainbow-tags
   :type 'integer)
 
@@ -149,8 +148,7 @@ them. Should be between 0-100."
 
 ;;;###autoload
 (define-minor-mode org-rainbow-tags-mode
-  "Colorize org tags automatically to make them visually
-distinguishable."
+  "Colorize org tags automatically to make them visually distinguishable."
   :require 'org-rainbow-tags
   :group 'org-rainbow-tags
   (if org-rainbow-tags-mode
@@ -198,7 +196,9 @@ distinguishable."
      "Auto-generated org tag face."))
 
 (defun org-rainbow-tags--set-face (name color)
-  "Set face attributes of face NAME."
+  "Set face attributes of face NAME.
+The arg COLOR seems like unused but it is actually used in
+`org-rainbow-tags-face-attributes'."
   `(set-face-attribute ',(intern name) nil ,@org-rainbow-tags-face-attributes))
 
 (defun org-rainbow-tags--get-face (tag)

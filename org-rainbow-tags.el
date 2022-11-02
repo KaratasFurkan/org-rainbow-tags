@@ -195,7 +195,8 @@ colors and want to change them. Should be between 0-100."
 
 (defun org-rainbow-tags--set-face (name color)
   "Set face attributes of face NAME.
-The arg COLOR seems like unused but it is actually used in
+COLOR is used in :foreground attribute by default but it can be used as
+background by adding `:inverse-video t' to
 `org-rainbow-tags-extra-face-attributes'."
   `(set-face-attribute ',(intern name) nil
                        :foreground ,color

@@ -74,9 +74,9 @@
 ;; (use-package org-rainbow-tags
 ;;   :straight (:host github :repo "KaratasFurkan/org-rainbow-tags")
 ;;   :custom
-;;   (org-rainbow-tags-face-attributes
-;;    ;; Default is '(:foreground color :weight 'bold)
-;;    '(:foreground color :inverse-video t :box t :weight 'bold))
+;;   (org-rainbow-tags-extra-face-attributes
+;;    ;; Default is '(:weight 'bold)
+;;    '(:inverse-video t :box t :weight 'bold))
 ;;   :hook
 ;;   (org-mode . org-rainbow-tags-mode))
 
@@ -112,12 +112,10 @@
   :group 'faces
   :prefix "org-rainbow-tags-")
 
-(defcustom org-rainbow-tags-face-attributes '(:foreground color :weight 'bold)
+(defcustom org-rainbow-tags-extra-face-attributes '(:weight 'bold)
   "Face attributes for auto-generated org tag faces.
-`color' is the placeholder for the auto-generated color and it can be used as
-foreground, background etc. All tags will look same if you omit `color'
-placeholder. Should be a list of ATTRIBUTE VALUE pairs like in
-`set-face-attribute' function."
+Should be a list of ATTRIBUTE VALUE pairs like in `set-face-attribute'
+function."
   :group 'org-rainbow-tags
   :type 'list)
 
@@ -198,8 +196,10 @@ colors and want to change them. Should be between 0-100."
 (defun org-rainbow-tags--set-face (name color)
   "Set face attributes of face NAME.
 The arg COLOR seems like unused but it is actually used in
-`org-rainbow-tags-face-attributes'."
-  `(set-face-attribute ',(intern name) nil ,@org-rainbow-tags-face-attributes))
+`org-rainbow-tags-extra-face-attributes'."
+  `(set-face-attribute ',(intern name) nil
+                       :foreground ,color
+                       ,@org-rainbow-tags-extra-face-attributes))
 
 (defun org-rainbow-tags--get-face (tag)
   "Generate a face with the hash of the TAG."

@@ -105,6 +105,10 @@
 
 ;;; Code:
 
+;;;; Requirements
+
+(require 'color)
+
 ;;;; Customization
 
 (defgroup org-rainbow-tags nil

@@ -1,5 +1,8 @@
 #+TITLE: Org Rainbow Tags
 
+[[https://www.gnu.org/software/emacs/][file:https://github.com/minad/corfu/blob/screenshots/emacs.svg?raw=true]]
+[[https://melpa.org/#/org-rainbow-tags][file:https://melpa.org/packages/org-rainbow-tags-badge.svg]]
+
 This package adds random colors to your org tags. In order to make colors random
 but consistent between same tags, colors are generated from the hash of the tag
 names.

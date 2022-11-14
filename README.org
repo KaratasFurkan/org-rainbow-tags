@@ -74,8 +74,8 @@ You need to enable package installations from MELPA if you didn't already.
 *** With ~init.el~ or ~.emacs~
 #+BEGIN_SRC emacs-lisp
 (unless (package-installed-p 'org-rainbow-tags)
-  (package-install 'org-rainbow-tags)
-  (require 'org-rainbow-tags))
+  (package-install 'org-rainbow-tags))
+(require 'org-rainbow-tags)
 #+END_SRC
 
 *** With ~use-package~

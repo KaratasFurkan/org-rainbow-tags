@@ -68,8 +68,8 @@
 ;;;;;; With ~init.el~ or ~.emacs~
 
 ;; (unless (package-installed-p 'org-rainbow-tags)
-;;   (package-install 'org-rainbow-tags)
-;;   (require 'org-rainbow-tags))
+;;   (package-install 'org-rainbow-tags))
+;; (require 'org-rainbow-tags)
 
 
 ;;;;;; With ~use-package~

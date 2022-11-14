@@ -19,6 +19,9 @@ each tag you use.
   - [[#manual][Manual]]
   - [[#using-straightel-and-use-package][Using ~straight.el~ and ~use-package~]]
   - [[#melpa][MELPA]]
+    - [[#interactively][Interactively]]
+    - [[#with-initel-or-emacs][With `init.el` or `.emacs`]]
+    - [[#with-use-package][With `use-package`]]
 - [[#usage][Usage]]
 - [[#known-issues][Known Issues]]
 
@@ -57,7 +60,29 @@ Modus operandi with ~org-rainbow-tags~ (with a custom face)
 #+END_SRC
 
 ** MELPA
-I'll work on this.
+You need to enable package installations from MELPA if you didn't already.
+/(See: https://melpa.org/#/getting-started)/
+#+BEGIN_SRC emacs-lisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+#+END_SRC
+
+*** Interactively
+`M-x package-install RET org-rainbow-tags RET`
+
+*** With `init.el` or `.emacs`
+#+BEGIN_SRC emacs-lisp
+(unless (package-installed-p 'org-rainbow-tags)
+  (package-install 'org-rainbow-tags)
+  (require 'org-rainbow-tags))
+#+END_SRC
+
+*** With `use-package`
+#+BEGIN_SRC emacs-lisp
+(use-package org-rainbow-tags
+  :ensure t)
+#+END_SRC
 
 * Usage
 You can run ~org-rainbow-tags-mode~ command in the buffer you wanna colorize the
@@ -73,19 +98,6 @@ To see customization options, you can run ~M-x customize-group RET
 org-rainbow-tags RET~ or you can check ~(defcustom ...)~ lines in
 ~org-rainbow-tags.el~.
 
-
-Full ~straight.el~ + ~use-package~ example:
-#+BEGIN_SRC emacs-lisp
-(use-package org-rainbow-tags
-  :straight (:host github :repo "KaratasFurkan/org-rainbow-tags")
-  :custom
-  (org-rainbow-tags-extra-face-attributes
-   ;; Default is '(:weight 'bold)
-   '(:inverse-video t :box t :weight 'bold))
-  :hook
-  (org-mode . org-rainbow-tags-mode))
-#+END_SRC
-
 If you don't like the auto-generated colors for your favorite tags, you can
 change the value of ~org-rainbow-tags-hash-start-index~ between 0-20. This
 variable decides which 12 characters of the hash of the tag should be taken to
@@ -94,6 +106,19 @@ generate the color.
 Example:
 #+BEGIN_SRC emacs-lisp
 (setq org-rainbow-tags-hash-start-index 10)
+#+END_SRC
+
+Full ~use-package~ example:
+#+BEGIN_SRC emacs-lisp
+(use-package org-rainbow-tags
+  :ensure t
+  :custom
+  (org-rainbow-tags-hash-start-index 10)
+  (org-rainbow-tags-extra-face-attributes
+   ;; Default is '(:weight 'bold)
+   '(:inverse-video t :box t :weight 'bold))
+  :hook
+  (org-mode . org-rainbow-tags-mode))
 #+END_SRC
 
 * Known Issues

@@ -63,16 +63,16 @@
 
 ;;;;;; Interactively
 
-;; `M-x package-install RET org-rainbow-tags RET`
+;; ~M-x package-install RET org-rainbow-tags RET~
 
-;;;;;; With `init.el` or `.emacs`
+;;;;;; With ~init.el~ or ~.emacs~
 
 ;; (unless (package-installed-p 'org-rainbow-tags)
 ;;   (package-install 'org-rainbow-tags)
 ;;   (require 'org-rainbow-tags))
 
 
-;;;;;; With `use-package`
+;;;;;; With ~use-package~
 
 ;; (use-package org-rainbow-tags
 ;;   :ensure t)

@@ -20,8 +20,8 @@ each tag you use.
   - [[#using-straightel-and-use-package][Using ~straight.el~ and ~use-package~]]
   - [[#melpa][MELPA]]
     - [[#interactively][Interactively]]
-    - [[#with-initel-or-emacs][With `init.el` or `.emacs`]]
-    - [[#with-use-package][With `use-package`]]
+    - [[#with-initel-or-emacs][With ~init.el~ or ~.emacs~]]
+    - [[#with-use-package][With ~use-package~]]
 - [[#usage][Usage]]
 - [[#known-issues][Known Issues]]
 
@@ -69,16 +69,16 @@ You need to enable package installations from MELPA if you didn't already.
 #+END_SRC
 
 *** Interactively
-`M-x package-install RET org-rainbow-tags RET`
+~M-x package-install RET org-rainbow-tags RET~
 
-*** With `init.el` or `.emacs`
+*** With ~init.el~ or ~.emacs~
 #+BEGIN_SRC emacs-lisp
 (unless (package-installed-p 'org-rainbow-tags)
   (package-install 'org-rainbow-tags)
   (require 'org-rainbow-tags))
 #+END_SRC
 
-*** With `use-package`
+*** With ~use-package~
 #+BEGIN_SRC emacs-lisp
 (use-package org-rainbow-tags
   :ensure t)

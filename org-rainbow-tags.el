@@ -245,7 +245,7 @@ background by adding `:inverse-video t' to
     (eval (org-rainbow-tags--set-face face-name color))
     face-name))
 
-(defvar org-rainbow-filetags-regexp
+(defvar org-rainbow-tags-filetags-regexp
   (rx (seq
        line-start
        "#+filetags:"
@@ -273,7 +273,7 @@ background by adding `:inverse-video t' to
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward
-           org-rainbow-filetags-regexp
+           org-rainbow-tags-filetags-regexp
            (save-excursion (org-next-visible-heading 1) (beginning-of-line) (point)) t)
       (org-rainbow-tags--apply-overlay-to-match))
     (while (re-search-forward org-tag-line-re nil t)

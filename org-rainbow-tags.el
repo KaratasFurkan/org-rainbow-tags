@@ -245,16 +245,39 @@ background by adding `:inverse-video t' to
     (eval (org-rainbow-tags--set-face face-name color))
     face-name))
 
+(defvar org-rainbow-filetags-regexp
+  (rx (seq
+       line-start
+       "#+filetags:"
+       (one-or-more whitespace)
+       ;; Capture the rest of the line
+       (group-n 1 (zero-or-more any))))
+  "Regular expression to match Org-mode filetags lines.")
+
+(defun org-rainbow-tags--apply-overlay-to-match ()
+  "Apply the auto-generated tag faces to the current regex match."
+  (goto-char (match-beginning 0))
+  (while (re-search-forward org-tag-group-re (line-end-position) t)
+    (when (eolp)
+      (save-excursion
+        (goto-char (match-beginning 0))
+        (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
+          (let* ((overlay (make-overlay (match-beginning 1) (match-end 1))))
+            (overlay-put overlay 'face (org-rainbow-tags--get-face 1))
+            (add-to-list 'org-rainbow-tags--overlays overlay)
+            (backward-char 2)))))))
+
 (defun org-rainbow-tags--apply-overlays ()
   "Add the auto-generated tag faces."
   (org-rainbow-tags--delete-overlays)
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward org-rainbow-tags--org-tag-regexp nil t)
-      (let* ((overlay (make-overlay (match-beginning 1) (match-end 1))))
-        (overlay-put overlay 'face (org-rainbow-tags--get-face 1))
-        (add-to-list 'org-rainbow-tags--overlays overlay))
-      (backward-char 2))))
+    (when (re-search-forward
+           org-rainbow-filetags-regexp
+           (save-excursion (org-next-visible-heading 1) (beginning-of-line) (point)) t)
+      (org-rainbow-tags--apply-overlay-to-match))
+    (while (re-search-forward org-tag-line-re nil t)
+      (org-rainbow-tags--apply-overlay-to-match))))
 
 (defun org-rainbow-tags--delete-overlays ()
   "Remove the auto-generated tag overlays."

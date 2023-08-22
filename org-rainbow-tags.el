@@ -284,55 +284,58 @@ to each tag in each cell of the clocktable column with the header `Tags'.
 
 For normal Org tag groups (e.g., ':tag1:tag2:'), the function will apply overlays
 to each tag in the group."
-  (save-excursion
-    (goto-char (match-beginning 0))
-    (cond
-     ;; Case for dynamic blocks that contain clocktables
-     ((looking-at-p org-dblock-start-re)
-      (let ((table-block-end (save-excursion
-                               (when (re-search-forward org-dblock-end-re (point-max) t)
-                                 (beginning-of-line)
-                                 (point))))
-            (tags-column-start nil)
-            (end-of-field nil))
-          (when (and table-block-end
+  (cond
+   ;; Case for dynamic blocks that contain clocktables
+   ((looking-at-p org-dblock-start-re)
+    (let ((table-block-end (save-excursion
+                             (when (re-search-forward org-dblock-end-re (point-max) t)
+                               (beginning-of-line)
+                               (point))))
+          (tags-column-start nil)
+          (end-of-field nil))
+      (when (and table-block-end
                  (re-search-forward org-table-hline-regexp table-block-end t))
-            (forward-line -1)
-            (when (search-forward "Tags" (line-end-position) t)
-              (search-backward "|")
-              (setq tags-column-start (current-column))
-              ;; Using these two is so much faster than `next-line' that I feel
-              ;; like I have to be missing a built-in that does this.
-              (forward-line 1)
-              (move-to-column tags-column-start)
-              ;; Loop through the table to find and apply overlays to tags
-              (while (< (point) table-block-end)
-                (forward-line 1)
-                (move-to-column tags-column-start)
-                (when (looking-at org-rainbow-tags--clocktable-tags-cell-regexp)
-                  (save-excursion
-                    (setq end-of-field (match-end 0))
-                    (while (re-search-forward org-rainbow-tags--single-clocktable-tag-regexp end-of-field t)
-                      (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))))))))))
-     ;; Case for normal Org tag groups
-     ((re-search-forward org-tag-group-re (line-end-position) t)
-      (goto-char (match-beginning 0))
-      (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
-        (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))
-        (backward-char 2))))))
+        (forward-line -1)
+        (when (search-forward "Tags" (line-end-position) t)
+          (search-backward "|")
+          (setq tags-column-start (current-column))
+          ;; Using these two is so much faster than `next-line' that I feel
+          ;; like I have to be missing a built-in that does this.
+          (forward-line 1)
+          (move-to-column tags-column-start)
+          ;; Loop through the table to find and apply overlays to tags
+          (while (< (point) table-block-end)
+            (forward-line 1)
+            (move-to-column tags-column-start)
+            (when (looking-at org-rainbow-tags--clocktable-tags-cell-regexp)
+              (save-excursion
+                (setq end-of-field (match-end 0))
+                (while (re-search-forward org-rainbow-tags--single-clocktable-tag-regexp end-of-field t)
+                  (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))))))))))
+   ;; Case for normal Org tag groups
+   ((re-search-forward org-tag-group-re (line-end-position) t)
+    (goto-char (match-beginning 0))
+    (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
+      (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))
+      (backward-char 2)))))
 
 (defun org-rainbow-tags--apply-overlays ()
   "Add the auto-generated tag faces."
   (org-rainbow-tags--delete-overlays)
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward
-           org-rainbow-tags--filetags-regexp
-           (save-excursion (re-search-forward org-element-headline-re nil t) (beginning-of-line) (point))
-           t)
-      (org-rainbow-tags--apply-overlays-to-matched-tag-section))
-    (while (re-search-forward org-rainbow-tags--tag-sections-regexp nil t)
-      (org-rainbow-tags--apply-overlays-to-matched-tag-section))))
+    (let ((first-headline (save-excursion
+                            (re-search-forward org-element-headline-re nil t)
+                            (beginning-of-line)
+                            (point))))
+      (while (< (point) first-headline)
+        (when (looking-at org-rainbow-tags--filetags-regexp)
+          (org-rainbow-tags--apply-overlays-to-matched-tag-section))
+        (forward-line 1)))
+      (while (not (eobp))
+        (when (looking-at org-rainbow-tags--tag-sections-regexp)
+          (org-rainbow-tags--apply-overlays-to-matched-tag-section))
+        (forward-line 1))))
 
 (defun org-rainbow-tags--delete-overlays ()
   "Remove the auto-generated tag overlays."

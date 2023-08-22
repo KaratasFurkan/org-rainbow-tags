@@ -284,41 +284,49 @@ to each tag in each cell of the clocktable column with the header `Tags'.
 
 For normal Org tag groups (e.g., ':tag1:tag2:'), the function will apply overlays
 to each tag in the group."
-  (goto-char (match-beginning 0))
-  (cond
-   ;; Case for dynamic blocks that contain clocktables
-   ((looking-at-p org-dblock-start-re)
-    (let ((table-block-end (save-excursion
-                             (re-search-forward org-dblock-end-re nil t)
-                             (beginning-of-line)
-                             (point)))
-          (tags-column-start nil)
-          (end-of-field nil))
-      (when (re-search-forward org-table-hline-regexp table-block-end t)
-        (forward-line -1)
-        (when (search-forward "Tags" (line-end-position) t)
-          (search-backward "|")
-          (setq tags-column-start (current-column))
-          ;; Using these two is so much faster than `next-line' that I feel
-          ;; like I have to be missing a built-in that does this.
-          (forward-line 1)
-          (move-to-column tags-column-start)
-          ;; Loop through the table to find and apply overlays to tags
-          (while (< (point) table-block-end)
-            (forward-line 1)
-            (move-to-column tags-column-start)
-            (when (looking-at org-rainbow-tags--clocktable-tags-cell-regexp)
-              (save-excursion
-                (setq end-of-field (match-end 0))
-                (while (re-search-forward org-rainbow-tags--single-clocktable-tag-regexp end-of-field t)
-                  (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))))))))))
-   ;; Case for normal Org tag groups
-   ((re-search-forward org-tag-group-re (line-end-position) t)
+  (let ((end-of-tag-section-match (match-end 0)))
     (goto-char (match-beginning 0))
-    (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
-      (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))
-      (backward-char 2))
-    (forward-line 1))))
+    (cond
+     ;; Case for dynamic blocks that contain clocktables
+     ((looking-at-p org-dblock-start-re)
+      (let ((table-block-end (save-excursion
+                               (when (re-search-forward org-dblock-end-re (point-max) t)
+                                 (beginning-of-line)
+                                 (point))))
+            (tags-column-start nil)
+            (end-of-field nil))
+        (cond
+         (table-block-end
+          (when (re-search-forward org-table-hline-regexp table-block-end t)
+            (forward-line -1)
+            (when (search-forward "Tags" (line-end-position) t)
+              (search-backward "|")
+              (setq tags-column-start (current-column))
+              ;; Using these two is so much faster than `next-line' that I feel
+              ;; like I have to be missing a built-in that does this.
+              (forward-line 1)
+              (move-to-column tags-column-start)
+              ;; Loop through the table to find and apply overlays to tags
+              (while (< (point) table-block-end)
+                (forward-line 1)
+                (move-to-column tags-column-start)
+                (when (looking-at org-rainbow-tags--clocktable-tags-cell-regexp)
+                  (save-excursion
+                    (setq end-of-field (match-end 0))
+                    (while (re-search-forward org-rainbow-tags--single-clocktable-tag-regexp end-of-field t)
+                      (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))))))))
+          (goto-char table-block-end))
+         (t
+          (goto-char end-of-tag-section-match)))))
+     ;; Case for normal Org tag groups
+     ((re-search-forward org-tag-group-re (line-end-position) t)
+      (goto-char (match-beginning 0))
+      (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
+        (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))
+        (backward-char 2))
+      (forward-line 1))
+     (t
+      (goto-char end-of-tag-section-match)))))
 
 (defun org-rainbow-tags--apply-overlays ()
   "Add the auto-generated tag faces."

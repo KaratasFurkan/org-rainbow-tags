@@ -167,6 +167,29 @@ colors and want to change them. Should be between 0-100."
 (defvar org-rainbow-tags--org-tag-regexp "[^\n]:\\([[:alnum:]_@#%]+\\):"
   "Regexp matching org tags.")
 
+(defvar org-rainbow-tags--filetags-regexp
+  (rx (seq bol "#+filetags:" (1+ " ")
+           (group (0+ any)) eol))
+  "Regular expression to match org filetags lines.")
+
+(defvar org-rainbow-tags--org-clocktable-regexp
+  (rx bol (0+ " ") "#+BEGIN:" (0+ " ") "clocktable")
+  "Regular expression matching the start of a clocktable block.")
+
+(defvar org-rainbow-tags--single-clocktable-tag-regexp
+  (rx (group (regexp org-tag-re))
+      (group (opt (or (seq "," (0+ " ")) (seq (0+ " ") "|")))))
+  "Regular expression matching a single tag in an org table cell.")
+
+(defvar org-rainbow-tags--clocktable-tags-cell-regexp
+  (rx (seq "|" (0+ " ") (1+ (regexp org-rainbow-tags--single-clocktable-tag-regexp))))
+  "Regular expression matching a set of tags in an org table cell.")
+
+(defvar org-rainbow-tags--tag-sections-regexp
+  (rx (or (regexp org-tag-line-re)
+          (regexp org-rainbow-tags--org-clocktable-regexp)))
+  "Regular expression matching all tag sections.")
+
 (defvar org-rainbow-tags--overlays '()
   "Variable to store overlays.")
 
@@ -245,27 +268,57 @@ background by adding `:inverse-video t' to
     (eval (org-rainbow-tags--set-face face-name color))
     face-name))
 
-(defvar org-rainbow-tags-filetags-regexp
-  (rx (seq
-       line-start
-       "#+filetags:"
-       (one-or-more whitespace)
-       ;; Capture the rest of the line
-       (group-n 1 (zero-or-more any))))
-  "Regular expression to match Org-mode filetags lines.")
+(defun org-rainbow-tags--apply-overlay (beg end)
+  "Create and apply `org-rainbow-tags' overlay to the text between BEG and END.
 
-(defun org-rainbow-tags--apply-overlay-to-match ()
-  "Apply the auto-generated tag faces to the current regex match."
+All created overlays are added to the `org-rainbow-tags--overlays' list for tracking purposes."
+  (let ((overlay (make-overlay beg end)))
+    (overlay-put overlay 'face (org-rainbow-tags--get-face 1))
+    (push overlay org-rainbow-tags--overlays)))
+
+(defun org-rainbow-tags--apply-overlays-to-matched-tag-section ()
+  "Apply a font face overlay to matched tag sections in the current buffer.
+
+For dynamic blocks containing clocktables, the function will apply overlays
+to each tag in each cell of the clocktable column with the header `Tags'.
+
+For normal Org tag groups (e.g., ':tag1:tag2:'), the function will apply overlays
+to each tag in the group."
   (goto-char (match-beginning 0))
-  (while (re-search-forward org-tag-group-re (line-end-position) t)
-    (when (eolp)
-      (save-excursion
-        (goto-char (match-beginning 0))
-        (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
-          (let* ((overlay (make-overlay (match-beginning 1) (match-end 1))))
-            (overlay-put overlay 'face (org-rainbow-tags--get-face 1))
-            (add-to-list 'org-rainbow-tags--overlays overlay)
-            (backward-char 2)))))))
+  (cond
+   ;; Case for dynamic blocks that contain clocktables
+   ((looking-at-p org-dblock-start-re)
+    (let ((table-block-end (save-excursion
+                             (re-search-forward org-dblock-end-re nil t)
+                             (beginning-of-line)
+                             (point)))
+          (tags-column-start nil)
+          (end-of-field nil))
+      (when (re-search-forward org-table-hline-regexp table-block-end t)
+        (forward-line -1)
+        (when (search-forward "Tags" (line-end-position) t)
+          (search-backward "|")
+          (setq tags-column-start (current-column))
+          ;; Using these two is so much faster than `next-line' that I feel
+          ;; like I have to be missing a built-in that does this.
+          (forward-line 1)
+          (move-to-column tags-column-start)
+          ;; Loop through the table to find and apply overlays to tags
+          (while (< (point) table-block-end)
+            (forward-line 1)
+            (move-to-column tags-column-start)
+            (when (looking-at org-rainbow-tags--clocktable-tags-cell-regexp)
+              (save-excursion
+                (setq end-of-field (match-end 0))
+                (while (re-search-forward org-rainbow-tags--single-clocktable-tag-regexp end-of-field t)
+                  (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))))))))))
+   ;; Case for normal Org tag groups
+   ((re-search-forward org-tag-group-re (line-end-position) t)
+    (goto-char (match-beginning 0))
+    (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
+      (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))
+      (backward-char 2))
+    (forward-line 1))))
 
 (defun org-rainbow-tags--apply-overlays ()
   "Add the auto-generated tag faces."
@@ -273,11 +326,12 @@ background by adding `:inverse-video t' to
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward
-           org-rainbow-tags-filetags-regexp
-           (save-excursion (org-next-visible-heading 1) (beginning-of-line) (point)) t)
-      (org-rainbow-tags--apply-overlay-to-match))
-    (while (re-search-forward org-tag-line-re nil t)
-      (org-rainbow-tags--apply-overlay-to-match))))
+           org-rainbow-tags--filetags-regexp
+           (save-excursion (re-search-forward org-element-headline-re nil t) (beginning-of-line) (point))
+           t)
+      (org-rainbow-tags--apply-overlays-to-matched-tag-section))
+    (while (re-search-forward org-rainbow-tags--tag-sections-regexp nil t)
+      (org-rainbow-tags--apply-overlays-to-matched-tag-section))))
 
 (defun org-rainbow-tags--delete-overlays ()
   "Remove the auto-generated tag overlays."

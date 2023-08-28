@@ -325,7 +325,7 @@ to each tag in the group."
   (save-excursion
     (goto-char (point-min))
     (let ((first-headline (save-excursion
-                            (re-search-forward org-element-headline-re nil t)
+                            (re-search-forward org-outline-regexp-bol nil t)
                             (beginning-of-line)
                             (point))))
       (while (< (point) first-headline)

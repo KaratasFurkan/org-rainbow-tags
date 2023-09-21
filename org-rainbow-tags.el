@@ -132,6 +132,7 @@
 ;;;; Requirements
 
 (require 'color)
+(require 'org)
 
 ;;;; Customization
 
@@ -204,10 +205,12 @@ colors and want to change them. Should be between 0-100."
       (progn
         (org-rainbow-tags--apply-overlays)
         (add-hook 'org-after-tags-change-hook
-                  'org-rainbow-tags--apply-overlays))
+                  'org-rainbow-tags--apply-overlays)
+        (advice-add 'org-clock-report :after 'org-rainbow-tags--apply-overlays-advice))
     (org-rainbow-tags--delete-overlays)
     (remove-hook 'org-after-tags-change-hook
-                 'org-rainbow-tags--apply-overlays)))
+                 'org-rainbow-tags--apply-overlays)
+    (advice-remove 'org-clock-report 'org-rainbow-tags--apply-overlays-advice)))
 
 ;;;; Functions
 
@@ -336,6 +339,15 @@ to each tag in the group."
         (when (looking-at org-rainbow-tags--tag-sections-regexp)
           (org-rainbow-tags--apply-overlays-to-matched-tag-section))
         (forward-line 1))))
+
+(defun org-rainbow-tags--apply-overlays-advice (&rest _)
+  "Advice function to apply `org-rainbow-tags--apply-overlays` after operations that change tags.
+
+This function is intended to be used as an `:after` advice to
+other functions. It calls `org-rainbow-tags--apply-overlays`
+regardless of the arguments passed to the advised function,
+ensuring that the overlays are refreshed."
+  (org-rainbow-tags--apply-overlays))
 
 (defun org-rainbow-tags--delete-overlays ()
   "Remove the auto-generated tag overlays."

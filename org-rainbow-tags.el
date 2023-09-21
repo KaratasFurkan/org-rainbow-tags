@@ -206,6 +206,7 @@ colors and want to change them. Should be between 0-100."
         (org-rainbow-tags--apply-overlays)
         (add-hook 'org-after-tags-change-hook
                   'org-rainbow-tags--apply-overlays)
+        ;; This advice is to account for updates to org clocktables which contain a tags column.
         (advice-add 'org-update-dblock :after (lambda (&rest _) (org-rainbow-tags--apply-overlays))))
     (org-rainbow-tags--delete-overlays)
     (remove-hook 'org-after-tags-change-hook

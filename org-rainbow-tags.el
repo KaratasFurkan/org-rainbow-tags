@@ -163,6 +163,33 @@ colors and want to change them. Should be between 0-100."
   :group 'org-rainbow-tags
   :type 'integer)
 
+(defcustom org-rainbow-tags-wanted-list nil
+  "A tag is deemed as wanted if it matches this exact list of tags,
+or matches the `org-rainbow-tags-wanted-regex' value.  If
+`org-rainbow-tags-wanted-invert' is set, then the search is inverted
+and all other tags except those matching the above are highlighted."
+  :group 'org-rainbow-tags
+  :type 'list)
+
+(defcustom org-rainbow-tags-wanted-regex nil
+  "A tag is deemed as wanted if it matches this exact regex,
+or matches an exact `org-rainbow-tags-wanted-list' entry. For
+example `(rx bow (or \"anti\" \"ultra\") (+ alpha) eow)' would
+match any tag that is a word that starts with `anti' or `ultra'.
+If `org-rainbow-tags-wanted-invert' is set, then the search is
+inverted and all other tags except those matching the above are
+highlighted."
+  :group 'org-rainbow-tags
+  :type 'regexp)
+
+(defcustom org-rainbow-tags-wanted-invert nil
+  "Inverts the wanted selection of tags defined by
+`org-rainbow-tags-wanted-list' and/or
+`org-rainbow-tags-wanted-invert'. If true, then all tags are
+highlighted, barring the ones defined in the mentioned settings."
+  :group 'org-rainbow-tags
+  :type 'boolean)
+
 ;;;; Variables
 
 (defvar org-rainbow-tags--org-tag-regexp "[^\n]:\\([[:alnum:]_@#%]+\\):"
@@ -320,8 +347,30 @@ to each tag in the group."
    ((re-search-forward org-tag-group-re (line-end-position) t)
     (goto-char (match-beginning 0))
     (while (re-search-forward org-rainbow-tags--org-tag-regexp (line-end-position) t)
-      (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1))
+      (if (org-rainbow-tags--valid-tags-p (match-beginning 1) (match-end 1))
+          (org-rainbow-tags--apply-overlay (match-beginning 1) (match-end 1)))
       (backward-char 2)))))
+
+(defun org-rainbow-tags--valid-tags-p (start end)
+  (let* ((tagname (buffer-substring-no-properties start end)))
+    (if (or org-rainbow-tags-wanted-list org-rainbow-tags-wanted-regex)
+        ;; Return a match if a search is defined
+        (let* ((wanted-match (or (and org-rainbow-tags-wanted-list
+                                      (member tagname org-rainbow-tags-wanted-list))
+                                 (and org-rainbow-tags-wanted-regex
+                                      ;; we need to preserve the last match for the --get-face
+                                      ;; function to work properly.
+                                      (save-match-data
+                                        (string-match org-rainbow-tags-wanted-regex
+                                                      tagname)))))
+               (valid-match (not (equal nil wanted-match))))
+          ;; Invert the search if needed
+          (if org-rainbow-tags-wanted-invert (not valid-match)
+            valid-match))
+      ;; Otherwise always return true if no search is defined
+      ;; (the default behaviour when no "wanted" custom values are set)
+      t)))
+
 
 (defun org-rainbow-tags--apply-overlays ()
   "Add the auto-generated tag faces."

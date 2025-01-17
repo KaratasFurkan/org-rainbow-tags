@@ -121,6 +121,30 @@ Full ~use-package~ example:
   (org-mode . org-rainbow-tags-mode))
 #+END_SRC
 
+* Customization
+
+You can selectively choose tags to colorize, using both the
+~org-rainbow-tags-wanted-list~ and ~org-rainbow-tags-wanted-regex~
+options to either select a specific list of tags, or tags matching the
+regular expression, respectively.
+
+This selection can be inverted too by setting the
+~org-rainbow-tags-wanted-invert~ option to non-nil.
+
+The following example colorizes all tags except those matching
+"ATTACH" and "ARCHIVE", as well as any tags that end in a number:
+#+begin_src emacs-lisp
+  (use-package org-rainbow-tags
+    :ensure t
+    :custom
+    (org-rainbow-tags-wanted-list '("ATTACH" "ARCHIVE"))
+    (org-rainbow-tags-wanted-regex (rx (any num) eow))
+    (org-rainbow-tags-wanted-invert t)
+    :hook
+    (org-mode . org-rainbow-tags-mode))
+#+end_src
+
+
 * Known Issues
 ~org-rainbow-tags-mode~ colorizes org tags when it's activated and also when a new
 tag is added/updated with ~org-set-tags-command~ or with ~C-c C-c~ on the headline.

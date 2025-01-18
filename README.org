@@ -118,7 +118,7 @@ Full ~use-package~ example:
    ;; Default is '(:weight 'bold)
    '(:inverse-video t :box t :weight 'bold))
   :hook
-  (org-mode . org-rainbow-tags-mode))
+  ((org-mode org-agenda-finalize) . org-rainbow-tags-mode))
 #+END_SRC
 
 * Customization
@@ -141,7 +141,7 @@ The following example colorizes all tags except those matching
     (org-rainbow-tags-wanted-regex (rx (any num) eow))
     (org-rainbow-tags-wanted-invert t)
     :hook
-    (org-mode . org-rainbow-tags-mode))
+    ((org-mode org-agenda-finalize) . org-rainbow-tags-mode))
 #+end_src
 
 

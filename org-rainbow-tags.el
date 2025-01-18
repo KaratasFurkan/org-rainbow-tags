@@ -215,7 +215,8 @@ highlighted, barring the ones defined in the mentioned settings."
 
 (defvar org-rainbow-tags--tag-sections-regexp
   (rx (or (regexp org-tag-line-re)
-          (regexp org-rainbow-tags--org-clocktable-regexp)))
+          (regexp org-rainbow-tags--org-clocktable-regexp)
+          (seq (* any) (regexp org-tag-group-re) (* any))))
   "Regular expression matching all tag sections.")
 
 (defvar org-rainbow-tags--overlays '()
